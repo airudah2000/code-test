@@ -3,21 +3,40 @@ package com.phone
 import java.sql.Time
 import java.time.temporal.ChronoUnit
 import java.time.{LocalDateTime, LocalTime}
-import java.util.Date
+import java.util.{Calendar, Date}
 
 import org.scalatest.FunSuite
+
+import scala.collection.immutable
 
 class Tests extends FunSuite with Util {
   test("I can run a test") {
 
+    val t1 = LocalDateTime.parse("00:00:23", dtf)
+    val t2 = LocalDateTime.parse("00:00:27", dtf)
+    val t3 = LocalDateTime.parse("00:00:05", dtf)
 
-    val t1 = Time.valueOf("00:00:23")
-    val t2 = Time.valueOf("00:00:27")
-    val t3 = Time.valueOf("00:00:05")
+    def addUpTime(times: List[LocalDateTime]): Unit = {
+      val calendar = Calendar.getInstance()
+      calendar.set(0,0,0, 0, 0, 0)
 
-    val sumOfTimes: Long = t1.getTime() + t2.getTime() + t3.getTime()
+      for(t <- times){
+        calendar.add(Calendar.HOUR,  t.getHour)
+        calendar.add(Calendar.MINUTE, t.getMinute)
+        calendar.add(Calendar.SECOND, t.getSecond)
+      }
 
-    println(new Date(sumOfTimes).getTime)
+      val summed = longToTimeString(calendar.getTime.getTime)
+
+      println("XX")
+      println(calendar.getTime.toString)
+      println(summed)
+      println("XX")
+
+
+    }
+
+    addUpTime(List(t1, t2, t3))
 
   }
 
