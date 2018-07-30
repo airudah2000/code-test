@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+import scala.collection.immutable
 import scala.collection.immutable.Iterable
 import scala.io.Source
 
@@ -52,8 +53,16 @@ trait Util {
   }
 
   def applyPromo(calls: Seq[Call]): Seq[Call] = {
-    val sortedByPhoneNumber: Seq[Seq[Call]] = calls.groupBy(_.numberCalled).values.toSeq.sortBy(x=>x.size).reverse
-    sortedByPhoneNumber.tail.flatten
+    val sortedByPhoneNumber: Map[String, Seq[Call]] = calls.groupBy(_.numberCalled)
+    val totalCost: scala.Iterable[String] = sortedByPhoneNumber
+      .map(c => c._1 -> callCosts(c._2))
+      .toList
+      .sortBy(_._2)
+      .reverse
+      .toMap
+      .keys
+
+    calls.filterNot(_.numberCalled == totalCost.head)
   }
 
   def callCosts(calls: Seq[Call]): Double = {

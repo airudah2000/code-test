@@ -26,12 +26,12 @@ class Tests extends FunSuite with Util {
     assert(expectedFirstCall === actualFirstCall)
   }
 
-  test("Promotion should exclude calls to the most frequent number for customer 'A' ") {
+  test("Promotion should exclude calls to the phone numver with the highest cost for customer 'A' ") {
     val callsA: Seq[Call] = calls.filter(_.customerId == 'A')
-    val mostFrequentNumber = "555-333-212" //frequency is 3
+    val mostExpensiveNumber = "555-333-212"
     val promoApplied = applyPromo(callsA)
 
-    assert(!promoApplied.map(_.numberCalled).contains(mostFrequentNumber))
+    assert(!promoApplied.map(_.numberCalled).contains(mostExpensiveNumber))
     assert(promoApplied.size === callsA.size - 3)
   }
 
