@@ -1,29 +1,75 @@
 package com.phone
 
-import java.util.{Date, Locale, TimeZone}
+import java.util.{Calendar, Date}
 import java.text.SimpleDateFormat
-import java.sql.Time
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+
+import scala.collection.immutable.Iterable
+import scala.io.Source
 
 trait Util {
 
   final val sdf = new SimpleDateFormat("HH:mm:ss")
   final val dtf: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
-  case class Calls(customerId: Char, numberCalled: Int, callDuration: Date)
+  case class Call(customerId: Char, numberCalled: String, callDuration: LocalTime)
 
-  def timeStringToDate(timeString: String) = {
-    val parsedTime: Time = Time.valueOf(timeString)
-    val dt = new Date(0L)
-    dt.setTime(parsedTime.getTime)
-    val timezz: String =  sdf.format(dt)
-
-    sdf.parse(timezz)
-  }
-
-  def longToTimeString(dateAsLong: Long) = {
+  def longToTimeString(dateAsLong: Long): String = {
     val dt = new Date(0L)
     dt.setTime(dateAsLong)
     sdf.format(dt)
   }
+
+  def sumUpTime(times: List[LocalTime]): String = {
+    val calendar = Calendar.getInstance()
+    calendar.set(0,0,0,0,0,0)
+
+    for(t <- times){
+      calendar.add(Calendar.HOUR,   t.getHour)
+      calendar.add(Calendar.MINUTE, t.getMinute)
+      calendar.add(Calendar.SECOND, t.getSecond)
+    }
+
+    val totalTime: String = longToTimeString(calendar.getTime.getTime)
+
+    totalTime
+  }
+
+  def parseCallLog(filePath: String): Seq[Call] = {
+    val calls: Seq[Call] = for {
+      line <- Source
+        .fromFile(filePath)
+        .getLines
+        .filter(_.nonEmpty)
+        .toSeq
+        .map(_.split(" "))
+    } yield {
+      Call(line.head.head, line(1), LocalTime.parse(line(2), dtf))
+    }
+
+    calls
+  }
+
+  def applyPromo(calls: Seq[Call]): Seq[Call] = {
+    val sortedByPhoneNumber: Seq[Seq[Call]] = calls.groupBy(_.numberCalled).values.toSeq.sortBy(x=>x.size).reverse
+    sortedByPhoneNumber.tail.flatten
+  }
+
+  def callCosts(calls: Seq[Call]): Double = {
+    val cost = calls.map(c =>
+      if(c.callDuration.getMinute >= 3) addCosts(c.callDuration, 0.03)
+      else addCosts(c.callDuration, 0.05)
+    ).sum
+
+    "%.2f".format(cost).toDouble
+  }
+
+  def addCosts(time: LocalTime, costPerSec: Double): Double = {
+    val hourCost = time.getHour  * 60 * 60 * costPerSec
+    val minCost = time.getMinute * 60 * costPerSec
+    val secCost = time.getMinute * costPerSec
+    hourCost + minCost + secCost
+  }
+
 }
