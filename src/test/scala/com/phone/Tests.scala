@@ -39,8 +39,8 @@ class Tests extends FunSuite with Util {
     val callsB = calls.filter(_.customerId === 'B')
     val callsBWithPromo = applyPromo(callsB)
 
-    val expectedTotalCallCost: Double = 19.52
-    val actualTotalCallCost: Double = callCosts(callsBWithPromo)
+    val expectedTotalCallCost: Double = 26.48
+    val actualTotalCallCost: Double = callsCost(callsBWithPromo)
 
     assert(expectedTotalCallCost === actualTotalCallCost)
   }

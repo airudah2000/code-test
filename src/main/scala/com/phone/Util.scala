@@ -4,9 +4,6 @@ import java.util.{Calendar, Date}
 import java.text.SimpleDateFormat
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-
-import scala.collection.immutable
-import scala.collection.immutable.Iterable
 import scala.io.Source
 
 trait Util {
@@ -55,7 +52,7 @@ trait Util {
   def applyPromo(calls: Seq[Call]): Seq[Call] = {
     val sortedByPhoneNumber: Map[String, Seq[Call]] = calls.groupBy(_.numberCalled)
     val totalCost: scala.Iterable[String] = sortedByPhoneNumber
-      .map(c => c._1 -> callCosts(c._2))
+      .map(c => c._1 -> callsCost(c._2))
       .toList
       .sortBy(_._2)
       .reverse
@@ -65,7 +62,7 @@ trait Util {
     calls.filterNot(_.numberCalled == totalCost.head)
   }
 
-  def callCosts(calls: Seq[Call]): Double = {
+  def callsCost(calls: Seq[Call]): Double = {
     val cost = calls.map(c =>
       if(c.callDuration.getMinute >= 3) addCosts(c.callDuration, 0.03)
       else addCosts(c.callDuration, 0.05)
@@ -77,7 +74,7 @@ trait Util {
   def addCosts(time: LocalTime, costPerSec: Double): Double = {
     val hourCost = time.getHour  * 60 * 60 * costPerSec
     val minCost = time.getMinute * 60 * costPerSec
-    val secCost = time.getMinute * costPerSec
+    val secCost = time.getSecond * costPerSec
     hourCost + minCost + secCost
   }
 

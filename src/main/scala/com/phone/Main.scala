@@ -8,7 +8,7 @@ object Main extends App with Util {
 
   for(customerCalls <- groupedByCustomers){
     val withPromo: Seq[Call] = applyPromo(customerCalls._2)
-    val totalCallCost: Double = callCosts(withPromo)
+    val totalCallCost: Double = callsCost(withPromo)
     println(s"Total cost of today's calls for customer '${customerCalls._1}' is: [£$totalCallCost]\n")
   }
 
